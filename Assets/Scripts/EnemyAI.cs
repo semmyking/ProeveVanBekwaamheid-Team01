@@ -55,17 +55,16 @@ public class EnemyAI : MonoBehaviour
     [SerializeField]
     private Vector3[] checkpoints;
 
+    [SerializeField]
+    private float[] checkpointSpeed;
+
 
     [SerializeField]
-    private float travelDurationDown = 1f,
+    private float travelDuration = 1f,
                   travelDurationUp = 2f;
 
     [SerializeField]
-    private float wait = 1f,
-                  wait2 = 4f;
-
-    private Vector3 pointA,
-                    pointB;
+    private float wait = 1f;
 
     private void Awake()
     {
@@ -73,50 +72,50 @@ public class EnemyAI : MonoBehaviour
         agent = GetComponent<NavMeshAgent>();
         guardAnim = GetComponent<Animator>();
         caught = false;
-
-        pointA = new Vector3(-14, 1, -14f);
-        pointB = new Vector3(-14, 1, 14);
-
-        //StartCoroutine(Timer());
-
+        //StartCoroutine(Checkpoint());
     }
 
-    private IEnumerator Timer()
-    {
-        // Loop 
-        while (Application.isPlaying)
-        {
-            //Travel from A to B
-            float speed = 0f;
-            while (speed < travelDurationDown)
-            {
-                transform.position = Vector3.Lerp(pointA, pointB, speed / travelDurationDown);
-                speed += Time.deltaTime;
-                yield return null;
-            }
+    //private IEnumerator Checkpoint()
+    //{
+    //    // Loop 
+    //    while (Application.isPlaying)
+    //    {
 
-            // In case the counter isn't equal to the travelDuration
-            transform.position = pointB;
+    //        for (int i = 0; i < checkpoints.Length; i++)
+    //        {
+    //            //Travel from 1 to 2
+    //            checkpointSpeed[i] = 0f;
+    //            while (checkpointSpeed[i] < travelDuration)
+    //            {
+    //                transform.position = Vector3.Lerp(checkpoints[i], checkpoints[i + 1], checkpointSpeed[i] / travelDuration % checkpoints.Length);
+    //                checkpointSpeed[i] += Time.deltaTime;
+    //                yield return null;
+    //            }
 
-            // wait
-            yield return new WaitForSeconds(wait);
+    //            // In case the counter isn't equal to the travelDuration
+    //            transform.position = checkpoints[i + 1 % checkpoints.Length];
 
-            //Travel back from B to A
-            float speed2 = 0f;
-            while (speed2 < travelDurationUp)
-            {
-                transform.position = Vector3.Lerp(pointB, pointA, speed2 / travelDurationUp);
-                speed2 += Time.deltaTime;
-                yield return null;
-            }
+    //            // wait
+    //            yield return new WaitForSeconds(wait);
 
-            // In case the counter isn't equal to the travelDuration
-            transform.position = pointA;
+    //            //Travel from 1 to 2
+    //            checkpoints[i] = checkpoints[0];
+    //            checkpointSpeed[i] = 0f;
+    //            while (checkpointSpeed[i] < travelDuration)
+    //            {
+    //                transform.position = Vector3.Lerp(checkpoints[3], checkpoints[i], checkpointSpeed[i] / travelDuration);
+    //                checkpointSpeed[i] += Time.deltaTime;
+    //                yield return null;
+    //            }
 
-            // Finally, wait
-            yield return new WaitForSeconds(wait2);
-        }
-    }
+    //            // In case the counter isn't equal to the travelDuration
+    //            transform.position = checkpoints[0];
+
+    //            // wait
+    //            yield return new WaitForSeconds(wait);
+    //        }
+    //    }
+    //}
     public void FixedUpdate()
     {
         switch (guardState)
@@ -124,7 +123,8 @@ public class EnemyAI : MonoBehaviour
             case GuardState.patrolling:
                 playerInsideRange = Physics.CheckSphere(transform.position, _sightDistance, whatIsPlayer);
                 playerInsideAttackRange = Physics.CheckSphere(transform.position, _attackRange, whatIsPlayer);
-                if (!EnemyFov.isInFov) Patroling();
+                if (!EnemyFov.isInFov) //Checkpoints();
+                //if ()  Patroling();
                 if (!playerInsideRange && !foundPlayer) EnemyFov.isInFov = false;
                 if (EnemyFov.isInFov) ChasePlayer();
                 if (agent.velocity.magnitude < 0.15f) walkpointSet = false;
@@ -144,12 +144,26 @@ public class EnemyAI : MonoBehaviour
         }
     }
 
+    public void Checkpoints()
+    {
+        for (int i = 0; i < checkpoints.Length; i++)
+        {
+            //Travel from 1 to 2
+            checkpointSpeed[i] = 0f;
+            if (checkpointSpeed[i] < travelDuration)
+            {
+                Vector3 checkpointToCheckpoint = new Vector3(transform.position.x + 6, transform.position.y, transform.position.z + 6);
+                agent.SetDestination(Vector3.Lerp(checkpoints[i], checkpoints[i + 1], checkpointSpeed[i] / travelDuration));
+                checkpointSpeed[i] += Time.deltaTime;
+            }
+        }
+    }
+
     public void Patroling()
     {
         agent.speed = walkSpeed;
-        guardAnim.Play("Walking");
+        //guardAnim.Play("Walking");
 
-        StartCoroutine(Timer());
 
         if (!walkpointSet) SearchWalkPoint();
         if (walkpointSet) agent.SetDestination(walkpoint);
@@ -162,10 +176,10 @@ public class EnemyAI : MonoBehaviour
 
     private void SearchWalkPoint()
     {
-        //float randomX = Random.Range(-_walkpointRange, _walkpointRange);
-        //float randomZ = Random.Range(-_walkpointRange, _walkpointRange);
+        float randomX = Random.Range(-_walkpointRange, _walkpointRange);
+        float randomZ = Random.Range(-_walkpointRange, _walkpointRange);
 
-        //walkpoint = new Vector3(transform.position.x + randomX, transform.position.y, transform.position.z + randomZ);
+        walkpoint = new Vector3(transform.position.x + randomX, transform.position.y, transform.position.z + randomZ);
 
 
         if (Physics.Raycast(walkpoint, -transform.up, 2f, whatIsGround)) walkpointSet = true;
@@ -182,7 +196,7 @@ public class EnemyAI : MonoBehaviour
         else { foundPlayer = false; EnemyFov.isInFov = false; }
         agent.speed = runSpeed;
         agent.SetDestination(player.position);
-        guardAnim.Play("Running");
+        // guardAnim.Play("Running");
         //SoundManager.audioSource.volume = 1;
         //if (SoundManager.audioSource.isPlaying == false && foundPlayer == true)
         //{
