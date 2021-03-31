@@ -2,7 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
-public enum GuardState
+public enum EnemyState
 {
     patrolling = 0,
     rotating = 1,
@@ -13,11 +13,8 @@ public class EnemyAI : MonoBehaviour
     [SerializeField]
     private NavMeshAgent agent;
 
-    [SerializeField]
-    private Animator guardAnim;
-
     //[SerializeField]
-    //private GameObject caughtScreen;
+    //private Animator EnemyAnim;
 
     [SerializeField]
     private float _sightDistance,
@@ -25,10 +22,6 @@ public class EnemyAI : MonoBehaviour
                   _walkpointRange,
                   walkSpeed,
                   runSpeed;
-
-    [Range(0, 200)]
-    [SerializeField]
-    private float speed = 100;
 
     [SerializeField]
     private bool playerInsideRange,
@@ -41,14 +34,13 @@ public class EnemyAI : MonoBehaviour
     private LayerMask whatIsPlayer,
                      whatIsGround;
 
-    public GuardState guardState = GuardState.patrolling;
+    public EnemyState enemyState = EnemyState.patrolling;
 
     private bool walkpointSet;
 
     private Vector3 walkpoint;
 
-    public static bool foundPlayer,
-                       caught;
+    public static bool foundPlayer;
 
 
 
@@ -61,17 +53,19 @@ public class EnemyAI : MonoBehaviour
 
     [SerializeField]
     private float travelDuration = 1f,
-                  travelDurationUp = 2f;
+                            wait = 1f;
 
-    [SerializeField]
-    private float wait = 1f;
+
+
+    public Vector3[] points;
+    private int destPoint = 0;
 
     private void Awake()
     {
         player = GameObject.Find("Player").transform;
         agent = GetComponent<NavMeshAgent>();
-        guardAnim = GetComponent<Animator>();
-        caught = false;
+        //EnemyAnim = GetComponent<Animator>();
+        
         //StartCoroutine(Checkpoint());
     }
 
@@ -118,45 +112,46 @@ public class EnemyAI : MonoBehaviour
     //}
     public void FixedUpdate()
     {
-        switch (guardState)
+        switch (enemyState)
         {
-            case GuardState.patrolling:
+            case EnemyState.patrolling:
                 playerInsideRange = Physics.CheckSphere(transform.position, _sightDistance, whatIsPlayer);
                 playerInsideAttackRange = Physics.CheckSphere(transform.position, _attackRange, whatIsPlayer);
-                if (!EnemyFov.isInFov) //Checkpoints();
+                if (!EnemyFov.isInFov) {  agent.autoBraking = false; }
                 //if ()  Patroling();
                 if (!playerInsideRange && !foundPlayer) EnemyFov.isInFov = false;
                 if (EnemyFov.isInFov) ChasePlayer();
                 if (agent.velocity.magnitude < 0.15f) walkpointSet = false;
                 break;
-            case GuardState.rotating:
+            case EnemyState.rotating:
                 agent.isStopped = true;
                 transform.Rotate(Vector3.up * 100 * Time.deltaTime, Space.Self);
                 break;
-            case GuardState.finishedPatrolling:
+            case EnemyState.finishedPatrolling:
                 transform.Rotate(Vector3.up * 20 * Time.deltaTime, Space.Self);
                 walkpointSet = false;
                 agent.isStopped = false;
-                guardState = GuardState.patrolling;
+                enemyState = EnemyState.patrolling;
                 break;
             default:
                 break;
         }
+        if (!agent.pathPending && agent.remainingDistance < 0.5f)
+            Checkpoints();
     }
 
     public void Checkpoints()
     {
-        for (int i = 0; i < checkpoints.Length; i++)
-        {
-            //Travel from 1 to 2
-            checkpointSpeed[i] = 0f;
-            if (checkpointSpeed[i] < travelDuration)
-            {
-                Vector3 checkpointToCheckpoint = new Vector3(transform.position.x + 6, transform.position.y, transform.position.z + 6);
-                agent.SetDestination(Vector3.Lerp(checkpoints[i], checkpoints[i + 1], checkpointSpeed[i] / travelDuration));
-                checkpointSpeed[i] += Time.deltaTime;
-            }
-        }
+        // Returns if no points have been set up
+        if (points.Length == 0)
+            return;
+
+        // Set the agent to go to the currently selected destination.
+        agent.destination = points[destPoint];
+
+        // Choose the next point in the array as the destination,
+        // cycling to the start if necessary.
+        destPoint = (destPoint + 1) % points.Length;
     }
 
     public void Patroling()
@@ -216,8 +211,7 @@ public class EnemyAI : MonoBehaviour
 
     public void Attacking()
     {
-        //caught = true;
-        //caughtScreen.SetActive(true);
+
     }
 }
 

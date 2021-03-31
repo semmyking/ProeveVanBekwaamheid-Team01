@@ -136,13 +136,13 @@ public class EnemyFov : MonoBehaviour
             if (hit.transform.tag == "Object")
             {
                 checkObject = true;
-                guardBehaviorScript.guardState = GuardState.rotating;
+                guardBehaviorScript.enemyState = EnemyState.rotating;
             }
         }
         else checkObject = false;
-        if (guardBehaviorScript.guardState == GuardState.rotating && checkObject == false)
+        if (guardBehaviorScript.enemyState == EnemyState.rotating && checkObject == false)
         {
-            guardBehaviorScript.guardState = GuardState.finishedPatrolling;
+            guardBehaviorScript.enemyState = EnemyState.finishedPatrolling;
         }
     }
     public void FixedUpdate()
