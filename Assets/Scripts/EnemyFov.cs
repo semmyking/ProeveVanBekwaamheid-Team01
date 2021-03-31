@@ -94,7 +94,7 @@ public class EnemyFov : MonoBehaviour
                 float angle = Vector3.Angle(checkingObject.forward + Vector3.up * heightMultiplayer, directionBetween);
 
                 if (angle <= maxAngle)
-                {
+                {   
                     isInFov = true;
                     inFOV = true;
                 }

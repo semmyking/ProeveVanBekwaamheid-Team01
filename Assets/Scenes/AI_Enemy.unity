@@ -393,7 +393,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1607298571}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 37.01, y: 1, z: 0}
+  m_LocalPosition: {x: 22.39, y: 1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -497,13 +497,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   agent: {fileID: 1760048564}
-  guardAnim: {fileID: 1760048563}
   _sightDistance: 14
   _attackRange: 1
   _walkpointRange: 20
   walkSpeed: 2
   runSpeed: 5
-  speed: 100
   playerInsideRange: 0
   playerInsideAttackRange: 0
   player: {fileID: 1607298575}
@@ -513,7 +511,7 @@ MonoBehaviour:
   whatIsGround:
     serializedVersion: 2
     m_Bits: 64
-  guardState: 0
+  enemyState: 0
   checkpoints:
   - {x: -14, y: 1, z: -14}
   - {x: -14, y: 1, z: 14}
@@ -521,12 +519,13 @@ MonoBehaviour:
   - {x: 14, y: 1, z: -14}
   checkpointSpeed:
   - 0
-  - 0
-  - 0
-  - 0
   travelDuration: 1
-  travelDurationUp: 2
   wait: 1
+  points:
+  - {x: -14, y: 1, z: -14}
+  - {x: -14, y: 1, z: 14}
+  - {x: 14, y: 1, z: 14}
+  - {x: 14, y: 1, z: -14}
 --- !u!23 &1760048568
 MeshRenderer:
   m_ObjectHideFlags: 0

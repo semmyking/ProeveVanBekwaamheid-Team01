@@ -42,20 +42,16 @@ public class EnemyAI : MonoBehaviour
 
     public static bool foundPlayer;
 
+    //[SerializeField]
+    //private Vector3[] checkpoints;
+
+    //[SerializeField]
+    //private float[] checkpointSpeed;
 
 
-    [SerializeField]
-    private Vector3[] checkpoints;
-
-    [SerializeField]
-    private float[] checkpointSpeed;
-
-
-    [SerializeField]
-    private float travelDuration = 1f,
-                            wait = 1f;
-
-
+    //[SerializeField]
+    //private float travelDuration = 1f,
+    //                        wait = 1f;
 
     public Vector3[] points;
     private int destPoint = 0;
@@ -117,7 +113,7 @@ public class EnemyAI : MonoBehaviour
             case EnemyState.patrolling:
                 playerInsideRange = Physics.CheckSphere(transform.position, _sightDistance, whatIsPlayer);
                 playerInsideAttackRange = Physics.CheckSphere(transform.position, _attackRange, whatIsPlayer);
-                if (!EnemyFov.isInFov) {  agent.autoBraking = false; }
+                if (!EnemyFov.isInFov) { agent.autoBraking = false; }
                 //if ()  Patroling();
                 if (!playerInsideRange && !foundPlayer) EnemyFov.isInFov = false;
                 if (EnemyFov.isInFov) ChasePlayer();
